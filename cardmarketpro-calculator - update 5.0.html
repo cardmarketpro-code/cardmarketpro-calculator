@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardMarketPro Score Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-weight {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .price-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 30px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            display: none;
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .score-display {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .score-circle.strong-buy {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .score-circle.buy {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .score-circle.hold {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .score-circle.sell {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+        }
+
+        .score-circle.strong-sell {
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+        }
+
+        .score-number {
+            font-size: 72px;
+        }
+
+        .score-label {
+            font-size: 16px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .recommendation {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .recommendation.strong-buy {
+            color: #11998e;
+            border: 3px solid #11998e;
+        }
+
+        .recommendation.buy {
+            color: #4facfe;
+            border: 3px solid #4facfe;
+        }
+
+        .recommendation.hold {
+            color: #fa709a;
+            border: 3px solid #fa709a;
+        }
+
+        .recommendation.sell {
+            color: #ff6b6b;
+            border: 3px solid #ff6b6b;
+        }
+
+        .recommendation.strong-sell {
+            color: #ee0979;
+            border: 3px solid #ee0979;
+        }
+
+        .breakdown {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .breakdown h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .factor {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .factor:last-child {
+            border-bottom: none;
+        }
+
+        .factor-name {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .factor-score {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .projection {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .projection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .projection-timeframe {
+            font-weight: 600;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .projection-signal {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .projection-signal.buy {
+            background: #11998e;
+            color: white;
+        }
+
+        .projection-signal.sell {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .projection-signal.hold {
+            background: #fa709a;
+            color: white;
+        }
+
+        .projection-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .projection-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .projection-label {
+            color: #666;
+        }
+
+        .projection-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .projection-value.up {
+            color: #11998e;
+        }
+
+        .projection-value.down {
+            color: #ff6b6b;
+        }
+
+        .projection-confidence {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 5px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .tweet-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .tweet-box h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .tweet-preview {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1DA1F2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #1a8cd8;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #17bf63;
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .price-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .score-circle {
+                width: 150px;
+                height: 150px;
+            }
+
+            .score-number {
+                font-size: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 CardMarketPro Score Calculator</h1>
+            <p>Data-Driven Pokemon Card Investment Analysis</p>
+        </div>
+
+        <div class="content">
+            <form id="calculatorForm">
+                <!-- Card Information -->
+                <div class="section">
+                    <h2 class="section-title">📋 Card Information</h2>
+                    <div class="input-group">
+                        <label for="cardName">Card Name *</label>
+                        <input type="text" id="cardName" required placeholder="e.g., Umbreon VMAX Alt Art">
+                    </div>
+                    <div class="input-group">
+                        <label for="setName">Set Name *</label>
+                        <input type="text" id="setName" required placeholder="e.g., Evolving Skies">
+                    </div>
+                    <div class="input-group">
+                        <label for="cardType">Card Type *</label>
+                        <select id="cardType" required>
+                            <option value="">Select type...</option>
+                            <option value="vintage">Vintage (Pre-2010)</option>
+                            <option value="modern">Modern (2010+)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="isHolofoil">Is this card Holofoil?</label>
+                        <select id="isHolofoil">
+                            <option value="no">No (Non-Holo)</option>
+                            <option value="yes">Yes (Holofoil)</option>
+                        </select>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            ⭐ PSA Guide: "Holofoil cards are more desirable and valuable, especially for vintage"
+                        </small>
+                    </div>
+                </div>
+
+                <!-- 1. PSA Population Trend (2.5 pts) -->
+                <div class="section">
+                    <h2 class="section-title">
+                        📊 PSA Population Trend
+                        <span class="section-weight">2.5 pts</span>
+                    </h2>
+                    <div class="input-group">
+                        <label for="totalPop">Total PSA Population *</label>
+                        <input type="number" id="totalPop" required placeholder="e.g., 450">
+                        <div class="helper-text">Total number of graded cards across all grades</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="monthlySubmissions">Monthly Submissions Trend *</label>
+                        <select id="monthlySubmissions" required>
+                            <option value="">Select trend...</option>
+                            <option value="declining">Declining (&lt;10/month) - Bullish</option>
+                            <option value="stable">Stable (10-30/month) - Neutral</option>
+                            <option value="growing">Growing (30-50/month) - Caution</option>
+                            <option value="accelerating">Accelerating (50+/month) - Bearish</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="psa10Pop">PSA 10 Population *</label>
+                        <input type="number" id="psa10Pop" required placeholder="e.g., 120">
+                        <div class="helper-text">Number of PSA 10 graded cards</div>
+                    </div>
+                </div>
+
+                <!-- 2. Grading Premium (2.5 pts) -->
+                <div class="section">
+                    <h2 class="section-title">
+                        💎 Grading Premium
+                        <span class="section-weight">2.5 pts</span>
+                    </h2>
+                    <div class="input-group">
+                        <label for="psa10Price">Average PSA 10 Price *</label>
+                        <input type="number" id="psa10Price" required placeholder="e.g., 3500">
+                        <div class="helper-text">Average price across all sources</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="psa9Price">Average PSA 9 Price *</label>
+                        <input type="number" id="psa9Price" required placeholder="e.g., 1200">
+                    </div>
+                    <div class="input-group">
+                        <label for="premiumTrend">Premium Trend *</label>
+                        <select id="premiumTrend" required>
+                            <option value="">Select trend...</option>
+                            <option value="expanding">Expanding - Bullish</option>
+                            <option value="stable">Stable - Neutral</option>
+                            <option value="contracting">Contracting - Bearish</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 3. Social Sentiment (2.0 pts) -->
+                <div class="section">
+                    <h2 class="section-title">
+                        🔥 Social Sentiment & Catalysts
+                        <span class="section-weight">2.0 pts</span>
+                    </h2>
+                    <div class="input-group">
+                        <label for="influencerMentions">Influencer Mentions *</label>
+                        <select id="influencerMentions" required>
+                            <option value="">Select level...</option>
+                            <option value="major">Major (Logan Paul, Gary Vee level)</option>
+                            <option value="midtier">Mid-tier (PokeRev, Leonhart, etc.)</option>
+                            <option value="minor">Minor influencers only</option>
+                            <option value="none">None</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Recent News/Events</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="newSetAnnounced">
+                                <label for="newSetAnnounced" style="margin-bottom: 0;">New set featuring character announced</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="viralMoment">
+                                <label for="viralMoment" style="margin-bottom: 0;">Card went viral on social media</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="majorVideo">
+                                <label for="majorVideo" style="margin-bottom: 0;">Featured in major video/stream</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tournamentPlay">
+                                <label for="tournamentPlay" style="margin-bottom: 0;">Tournament/competitive play exposure</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="reprintRumors">
+                                <label for="reprintRumors" style="margin-bottom: 0;">Reprint rumors (NEGATIVE)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="setTiming">Set Release Timing *</label>
+                        <select id="setTiming" required>
+                            <option value="">Select timing...</option>
+                            <option value="prerelease">Pre-release hype (0-3 months before)</option>
+                            <option value="postrelease">Post-release (0-6 months after)</option>
+                            <option value="mature">Mature set (6+ months)</option>
+                            <option value="vintage">Vintage (no new releases)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="socialNotes">Additional Social Notes</label>
+                        <textarea id="socialNotes" placeholder="Note any specific catalysts, viral moments, or trending topics..."></textarea>
+                    </div>
+                </div>
+
+                <!-- 4. Price Momentum (1.5 pts) -->
+                <div class="section">
+                    <h2 class="section-title">
+                        📈 Price Momentum
+                        <span class="section-weight">1.5 pts</span>
+                    </h2>
+                    <div class="input-group">
+                        <label>Price Data from Multiple Sources (Optional)</label>
+                        <div class="price-inputs">
+                            <div>
+                                <label for="priceCharting">PriceCharting</label>
+                                <input type="number" id="priceCharting" placeholder="e.g., 2850">
+                            </div>
+                            <div>
+                                <label for="goldin">Goldin</label>
+                                <input type="number" id="goldin" placeholder="e.g., 3000">
+                            </div>
+                            <div>
+                                <label for="ebay">eBay (Recent Sold)</label>
+                                <input type="number" id="ebay" placeholder="e.g., 2900">
+                            </div>
+                            <div>
+                                <label for="tcgMarketplace">TCG Marketplace (Raw only)</label>
+                                <input type="number" id="tcgMarketplace" placeholder="e.g., 2950">
+                            </div>
+                        </div>
+                        <div class="helper-text">Optional - These fields are redundant if you're using graded prices above. Skip for graded cards.</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="priceChange30d">30-Day Price Change (Optional)</label>
+                        <select id="priceChange30d">
+                            <option value="">Select change...</option>
+                            <option value="strong-up">+20% or more - Very Bullish</option>
+                            <option value="up">+10% to +20% - Bullish</option>
+                            <option value="flat">-10% to +10% - Neutral</option>
+                            <option value="down">-10% to -20% - Bearish</option>
+                            <option value="strong-down">-20% or more - Very Bearish</option>
+                        </select>
+                        <div class="helper-text">Optional - Skip if you prefer to analyze based on graded price data only</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="salesVolume">Sales Volume (Optional)</label>
+                        <select id="salesVolume">
+                            <option value="">Select volume...</option>
+                            <option value="high">High (Multiple sales per week)</option>
+                            <option value="moderate">Moderate (Few sales per week)</option>
+                            <option value="low">Low (Sporadic sales)</option>
+                        </select>
+                        <div class="helper-text">Optional - Skip if you prefer to analyze based on graded price data only</div>
+                    </div>
+                </div>
+
+                <!-- 5. Market Positioning (1.5 pts) -->
+                <div class="section">
+                    <h2 class="section-title">
+                        🎯 Market Positioning
+                        <span class="section-weight">1.5 pts</span>
+                    </h2>
+                    <div class="input-group">
+                        <label for="characterDesirability">Character/Pokemon Desirability *</label>
+                        <select id="characterDesirability" required>
+                            <option value="">Select desirability...</option>
+                            <option value="high">High (Charizard, Pikachu, Eeveelutions, etc.)</option>
+                            <option value="medium">Medium (Popular but not top-tier)</option>
+                            <option value="low">Low (Niche appeal)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="setPopularity">Set Popularity *</label>
+                        <select id="setPopularity" required>
+                            <option value="">Select popularity...</option>
+                            <option value="high">High (Evolving Skies, Base Set, etc.)</option>
+                            <option value="medium">Medium (Solid but not legendary)</option>
+                            <option value="low">Low (Forgotten or unpopular)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="artworkQuality">Artwork Quality/Desirability *</label>
+                        <select id="artworkQuality" required>
+                            <option value="">Select quality...</option>
+                            <option value="high">High (Alt Art, Illustration Rare, iconic)</option>
+                            <option value="medium">Medium (Standard full art)</option>
+                            <option value="low">Low (Basic/common artwork)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 6. Technical Indicators (0.5 pts) -->
+                <div class="section">
+                    <h2 class="section-title">
+                        📉 Technical Indicators
+                        <span class="section-weight">0.5 pts</span>
+                    </h2>
+                    <div class="input-group">
+                        <label for="priceLevel">Current Price Level *</label>
+                        <select id="priceLevel" required>
+                            <option value="">Select level...</option>
+                            <option value="breaking-resistance">Breaking resistance - Bullish</option>
+                            <option value="consolidating">Consolidating at support - Neutral</option>
+                            <option value="breaking-support">Breaking support - Bearish</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="seasonalTrends">Seasonal Trends *</label>
+                        <select id="seasonalTrends" required>
+                            <option value="">Select trend...</option>
+                            <option value="favorable">Favorable (Holiday season, set anniversary)</option>
+                            <option value="neutral">Neutral</option>
+                            <option value="unfavorable">Unfavorable (Post-holiday slump)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 7. Competitive Playability (0.5 pts) - NEW -->
+                <div class="section">
+                    <h2 class="section-title">
+                        ⚔️ Competitive Playability
+                        <span class="section-weight">0.5 pts</span>
+                    </h2>
+                    <div class="input-group">
+                        <label for="competitivePlay">Tournament Meta Status</label>
+                        <select id="competitivePlay">
+                            <option value="not-playable">Not competitively playable (Collector only)</option>
+                            <option value="casual-playable">Casual play only</option>
+                            <option value="tier2-playable">Tier 2 playable</option>
+                            <option value="tier1-staple">Tier 1 deck staple</option>
+                            <option value="meta-defining">Meta-defining (Tournament winner)</option>
+                        </select>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            💡 Meta-defining cards spike in price. Rotation/bans sharply reduce value.
+                        </small>
+                    </div>
+                </div>
+
+                <button type="submit" class="calculate-btn">Calculate CardMarketPro Score</button>
+            </form>
+
+            <!-- Results Section -->
+            <div id="results" class="results">
+                <div class="score-display">
+                    <div id="scoreCircle" class="score-circle">
+                        <div>
+                            <div class="score-number" id="scoreNumber">0</div>
+                            <div class="score-label">/10</div>
+                        </div>
+                    </div>
+                    <div id="recommendation" class="recommendation">CALCULATING...</div>
+                </div>
+
+                <div class="breakdown">
+                    <h3>📊 Score Breakdown</h3>
+                    <div class="factor">
+                        <span class="factor-name">PSA Population Trend</span>
+                        <span class="factor-score" id="popScore">0/2.5</span>
+                    </div>
+                    <div class="factor">
+                        <span class="factor-name">Grading Premium</span>
+                        <span class="factor-score" id="premiumScore">0/2.0</span>
+                    </div>
+                    <div class="factor">
+                        <span class="factor-name">Social Sentiment & Catalysts</span>
+                        <span class="factor-score" id="socialScore">0/2.0</span>
+                    </div>
+                    <div class="factor">
+                        <span class="factor-name">Price Momentum</span>
+                        <span class="factor-score" id="momentumScore">0/1.5</span>
+                    </div>
+                    <div class="factor">
+                        <span class="factor-name">Market Positioning</span>
+                        <span class="factor-score" id="positionScore">0/1.5</span>
+                    </div>
+                    <div class="factor">
+                        <span class="factor-name">Technical Indicators</span>
+                        <span class="factor-score" id="technicalScore">0/0.5</span>
+                    </div>
+                    <div class="factor">
+                        <span class="factor-name">Competitive Playability</span>
+                        <span class="factor-score" id="playabilityScore">0/0.5</span>
+                    </div>
+                    <div class="factor">
+                        <span class="factor-name">Market Momentum (Top 100)</span>
+                        <span class="factor-score" id="trendingScore">0/0.5</span>
+                    </div>
+                </div>
+
+                <div class="breakdown">
+                    <h3>🎯 Price Projections (PSA 10)</h3>
+                    <div id="priceProjections"></div>
+                </div>
+
+                <div class="tweet-box">
+                    <h3>🐦 Twitter Post</h3>
+                    <div class="tweet-preview" id="tweetPreview"></div>
+                    <button class="copy-btn" id="copyBtn">Copy Tweet to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            alert('Form submitted! Checking fields...');
+            
+            // Check for missing required fields
+            const requiredFields = this.querySelectorAll('[required]');
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                if (!field.value || field.value === '') {
+                    const label = field.parentElement.querySelector('label');
+                    const fieldName = label ? label.textContent : field.id;
+                    missingFields.push(fieldName);
+                    field.style.borderColor = '#ff6b6b';
+                    field.style.borderWidth = '3px';
+                }
+            });
+            
+            if (missingFields.length > 0) {
+                alert('Please fill in the following required fields:\n\n' + missingFields.join('\n'));
+                return;
+            }
+            
+            alert('All fields validated! Calculating score...');
+            calculateScore();
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const tweetText = document.getElementById('tweetPreview').textContent;
+            navigator.clipboard.writeText(tweetText).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy Tweet to Clipboard';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        function calculateScore() {
+            console.log('Calculate score function called');
+            let totalScore = 0;
+            let scores = {};
+            let monthlyGrowthRate = 0;
+            let confidence = 0;
+            
+            // Get common variables used throughout
+            const cardNameLower = document.getElementById('cardName').value.toLowerCase();
+            const setNameLower = document.getElementById('setName').value.toLowerCase();
+            const cardType = document.getElementById('cardType').value;
+
+            // Get PSA 10 price early for use throughout
+            console.log('Getting psa10Price from element...');
+            const psa10PriceElement = document.getElementById('psa10Price');
+            console.log('psa10Price element:', psa10PriceElement);
+            console.log('psa10Price element value:', psa10PriceElement ? psa10PriceElement.value : 'ELEMENT NOT FOUND');
+            
+            const psa10Price = parseFloat(document.getElementById('psa10Price').value);
+            const psa9Price = parseFloat(document.getElementById('psa9Price').value);
+            
+            console.log('psa10Price parsed:', psa10Price);
+            console.log('psa9Price parsed:', psa9Price);
+
+            // 1. PSA Population Trend (2.5 pts)
+            const totalPop = parseInt(document.getElementById('totalPop').value);
+            const monthlySubmissions = document.getElementById('monthlySubmissions').value;
+            const psa10Pop = parseInt(document.getElementById('psa10Pop').value);
+            
+            console.log('Population data:', totalPop, monthlySubmissions, psa10Pop);
+            
+            let popScore = 0;
+            if (totalPop < 500 && monthlySubmissions === 'declining') {
+                popScore = 2.5;
+            } else if (totalPop < 1000 && monthlySubmissions === 'stable') {
+                popScore = 2.0;
+            } else if (totalPop < 2000 && monthlySubmissions === 'stable') {
+                popScore = 1.5;
+            } else if (totalPop < 5000 && monthlySubmissions === 'growing') {
+                popScore = 1.0;
+            } else if (monthlySubmissions === 'accelerating') {
+                popScore = 0.5;
+            } else {
+                popScore = 0.3;
+            }
+            
+            // Update 2: Low-population PSA 10 scarcity bonus
+            // "Limited-release, low-population cards are highly coveted"
+            if (psa10Pop < 500) {
+                popScore += 0.5;
+            }
+            if (psa10Pop < 200) {
+                popScore += 0.5; // Total +1.0 for ultra-rare
+            }
+            
+            // Update 14: Sales Volume/Liquidity Factor
+            // Going Twice: "50 listings = lot of competition = harder to sell"
+            // High population + accelerating submissions = oversupplied market
+            if (totalPop > 5000 && monthlySubmissions === 'accelerating') {
+                confidence -= 5; // Oversupplied market penalty
+            }
+            
+            scores.pop = popScore;
+            totalScore += popScore;
+            
+            console.log('Pop score:', popScore, 'Total so far:', totalScore);
+
+            // 2. Grading Premium (2.5 pts) - INCREASED from 2.0 due to "Condition is King" principle
+            // psa10Price and psa9Price already declared at top of function
+            const premiumTrend = document.getElementById('premiumTrend').value;
+            
+            const premiumRatio = psa10Price / psa9Price;
+            let premiumScore = 0;
+            
+            // Update 15: Grading Premium Reality Check
+            // Going Twice data: Raw $500 → CGC 9 $600 (only +20%)
+            // Need 9.5+ for meaningful premium
+            if (premiumRatio >= 3 && premiumTrend === 'expanding') {
+                premiumScore = 2.5; // Strong premium (like CGC 10 vs 9.5)
+            } else if (premiumRatio >= 2.5 && premiumTrend === 'stable') {
+                premiumScore = 2.0; // Good premium (9.5 vs 9 range)
+            } else if (premiumRatio >= 2 && premiumTrend === 'stable') {
+                premiumScore = 1.5; // Moderate premium
+            } else if (premiumRatio >= 1.5) {
+                premiumScore = 0.8; // Weak premium (may not justify grading)
+            } else if (premiumRatio >= 1.2) {
+                premiumScore = 0.5; // Very weak premium (grading likely not worth it)
+            } else {
+                premiumScore = 0.3; // Minimal premium
+            }
+            
+            if (premiumTrend === 'contracting') {
+                premiumScore *= 0.5;
+            }
+            
+            scores.premium = premiumScore;
+            totalScore += premiumScore;
+
+            // 3. Social Sentiment (2.0 pts)
+            const influencerMentions = document.getElementById('influencerMentions').value;
+            const newSetAnnounced = document.getElementById('newSetAnnounced').checked;
+            const viralMoment = document.getElementById('viralMoment').checked;
+            const majorVideo = document.getElementById('majorVideo').checked;
+            const tournamentPlay = document.getElementById('tournamentPlay').checked;
+            const reprintRumors = document.getElementById('reprintRumors').checked;
+            const setTiming = document.getElementById('setTiming').value;
+            
+            let socialScore = 0;
+            
+            // Base influencer score
+            if (influencerMentions === 'major') {
+                socialScore = 1.2;
+            } else if (influencerMentions === 'midtier') {
+                socialScore = 0.8;
+            } else if (influencerMentions === 'minor') {
+                socialScore = 0.4;
+            } else {
+                socialScore = 0.1;
+            }
+            
+            // Catalyst bonuses
+            if (newSetAnnounced) socialScore += 0.3;
+            if (viralMoment) socialScore += 0.4;
+            if (majorVideo) socialScore += 0.3;
+            if (tournamentPlay) socialScore += 0.2;
+            
+            // Set timing modifier
+            if (setTiming === 'prerelease') {
+                socialScore *= 1.2;
+            } else if (setTiming === 'postrelease') {
+                socialScore *= 0.9;
+            }
+            
+            // Reprint penalty
+            if (reprintRumors) {
+                socialScore *= 0.5;
+            }
+            
+            // Cap at 2.0
+            socialScore = Math.min(socialScore, 2.0);
+            scores.social = socialScore;
+            totalScore += socialScore;
+
+            // 4. Price Momentum (1.5 pts)
+            const priceChange = document.getElementById('priceChange30d').value;
+            const salesVolume = document.getElementById('salesVolume').value;
+            
+            let momentumScore = 0;
+            
+            // If both fields are empty, give neutral score
+            if (!priceChange && !salesVolume) {
+                momentumScore = 0.75; // Neutral/middle score
+            } else {
+                // Price change component
+                if (priceChange === 'strong-up') {
+                    momentumScore = 1.0;
+                } else if (priceChange === 'up') {
+                    momentumScore = 0.75;
+                } else if (priceChange === 'flat' || !priceChange) {
+                    momentumScore = 0.5;
+                } else if (priceChange === 'down') {
+                    momentumScore = 0.25;
+                } else if (priceChange === 'strong-down') {
+                    momentumScore = 0;
+                }
+                
+                // Volume modifier
+                if (salesVolume === 'high') {
+                    momentumScore += 0.5;
+                } else if (salesVolume === 'moderate') {
+                    momentumScore += 0.3;
+                } else if (salesVolume === 'low') {
+                    momentumScore += 0.1;
+                } else if (!salesVolume) {
+                    momentumScore += 0.25; // Neutral modifier if not specified
+                }
+            }
+            
+            scores.momentum = Math.min(momentumScore, 1.5);
+            totalScore += scores.momentum;
+            
+            // Calculate average price for tweet (optional - only if prices provided)
+            const prices = [
+                parseFloat(document.getElementById('priceCharting').value) || 0,
+                parseFloat(document.getElementById('goldin').value) || 0,
+                parseFloat(document.getElementById('ebay').value) || 0,
+                parseFloat(document.getElementById('tcgMarketplace').value) || 0
+            ].filter(p => p > 0);
+            
+            let avgPrice = 0;
+            if (prices.length > 0) {
+                avgPrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+            }
+
+            // 5. Market Positioning (1.5 pts)
+            const characterDesirability = document.getElementById('characterDesirability').value;
+            const setPopularity = document.getElementById('setPopularity').value;
+            const artworkQuality = document.getElementById('artworkQuality').value;
+            
+            let positionScore = 0;
+            
+            if (characterDesirability === 'high') positionScore += 0.6;
+            else if (characterDesirability === 'medium') positionScore += 0.4;
+            else positionScore += 0.2;
+            
+            if (setPopularity === 'high') positionScore += 0.5;
+            else if (setPopularity === 'medium') positionScore += 0.3;
+            else positionScore += 0.1;
+            
+            if (artworkQuality === 'high') positionScore += 0.4;
+            else if (artworkQuality === 'medium') positionScore += 0.2;
+            else positionScore += 0.1;
+            
+            // Update 10: Modern Chase Card Bonus
+            // PSA Guide: "Alt Art, Illustration Rares, Special Illustration Rares are most sought-after"
+            const isModernChaseCard = cardNameLower.includes('alt art') ||
+                                     cardNameLower.includes('alternate art') ||
+                                     cardNameLower.includes('illustration rare') ||
+                                     cardNameLower.includes('sir') ||
+                                     cardNameLower.includes('special illustration') ||
+                                     setNameLower.includes('alt art');
+            
+            if (isModernChaseCard && cardType === 'modern') {
+                positionScore += 0.3; // Bonus for modern chase variants
+            }
+            
+            // Update 11: Secret Rare Premium
+            // PSA Guide: "Secret Rares are typically higher rarity and desirable"
+            const isSecretRare = cardNameLower.includes('secret rare') || 
+                                setNameLower.includes('secret rare') ||
+                                cardNameLower.includes('sr');
+            
+            if (isSecretRare) {
+                positionScore += 0.2; // Secret Rare bonus
+            }
+            
+            // Update 12: Error Card Rarity Bonus
+            // PSA Guide: "Errors are celebrated for their added level of rarity"
+            const isErrorCard = cardNameLower.includes('error') ||
+                               cardNameLower.includes('misprint') ||
+                               setNameLower.includes('error');
+            
+            if (isErrorCard) {
+                positionScore += 0.3; // Error card rarity bonus
+            }
+            
+            // Update 22: Trainer Partnership Premium
+            // 2025-2026 Data: "Trainer & Pokemon Partnerships have shown strong high-volume demand"
+            const hasTrainerPartnership = cardNameLower.includes("'s ") || // Misty's, Lillie's, etc.
+                                         cardNameLower.includes('trainer') ||
+                                         setNameLower.includes('trainer');
+            
+            if (hasTrainerPartnership) {
+                positionScore += 0.2; // Trainer partnership bonus
+            }
+            
+            // Cap position score at max possible
+            positionScore = Math.min(positionScore, 2.0);
+            
+            scores.position = positionScore;
+            totalScore += positionScore;
+
+            // 6. Technical Indicators (0.5 pts)
+            const priceLevel = document.getElementById('priceLevel').value;
+            const seasonalTrends = document.getElementById('seasonalTrends').value;
+            
+            let technicalScore = 0;
+            
+            if (priceLevel === 'breaking-resistance') technicalScore += 0.3;
+            else if (priceLevel === 'consolidating') technicalScore += 0.15;
+            else technicalScore += 0;
+            
+            if (seasonalTrends === 'favorable') technicalScore += 0.2;
+            else if (seasonalTrends === 'neutral') technicalScore += 0.1;
+            else technicalScore += 0;
+            
+            scores.technical = technicalScore;
+            totalScore += technicalScore;
+            
+            // 7. Competitive Playability (0.5 pts) - NEW
+            // Market Framework: "Meta-defining card often spikes in price"
+            const competitivePlay = document.getElementById('competitivePlay')?.value || 'not-playable';
+            
+            let playabilityScore = 0;
+            
+            if (competitivePlay === 'meta-defining') {
+                playabilityScore = 0.5; // Currently defining tournament meta
+            } else if (competitivePlay === 'tier1-staple') {
+                playabilityScore = 0.35; // Tier 1 deck staple
+            } else if (competitivePlay === 'tier2-playable') {
+                playabilityScore = 0.2; // Tier 2 playable
+            } else if (competitivePlay === 'casual-playable') {
+                playabilityScore = 0.1; // Casual play only
+            } else {
+                playabilityScore = 0; // Not competitively playable
+            }
+            
+            scores.playability = playabilityScore;
+            totalScore += playabilityScore;
+            
+            // 8. Market Momentum / Top 100 Trending (0.5 pts) - UPDATED FEB 4, 2026
+            // Based on Pokemon Wizard Top 100 real-time market data
+            // NOTE: Reflects ungraded prices, but trends apply to PSA 9/10 equally
+            
+            const cardFullName = cardNameLower + ' ' + setNameLower;
+            let trendingScore = 0;
+            
+            // GOLD STAR CARDS - HOTTEST TREND (500-900% gains!)
+            const isGoldStar = cardNameLower.includes('star') || cardNameLower.includes(' star');
+            const isGoldStarSet = setNameLower.includes('deoxys') ||
+                                 setNameLower.includes('team rocket returns') ||
+                                 setNameLower.includes('holon phantoms') ||
+                                 setNameLower.includes('dragon frontiers') ||
+                                 setNameLower.includes('power keepers') ||
+                                 setNameLower.includes('delta species') ||
+                                 setNameLower.includes('crystal guardians') ||
+                                 setNameLower.includes('legend maker') ||
+                                 setNameLower.includes('unseen forces') ||
+                                 setNameLower.includes('pop series');
+            
+            if (isGoldStar && isGoldStarSet) {
+                trendingScore = 0.5; // Gold Stars are THE trend right now
+                monthlyGrowthRate += 0.025; // +2.5% for Gold Star cards
+                confidence += 10;
+            }
+            
+            // TOP 20 TRENDING CARDS (Week of Feb 4, 2026)
+            const isTop20 = (cardNameLower.includes('charizard') && (setNameLower.includes('base set shadowless') || setNameLower.includes('neo destiny'))) || // #1-4
+                           (cardNameLower.includes('latios star') && setNameLower.includes('deoxys')) || // #5
+                           (cardNameLower.includes('treecko star') && setNameLower.includes('team rocket returns')) || // #7
+                           (cardNameLower.includes('charizard') && setNameLower.includes('skyridge')) || // #8-9
+                           (cardNameLower.includes('latias star') && setNameLower.includes('deoxys')) || // #10
+                           (cardNameLower.includes('kyogre star') && setNameLower.includes('delta species')) || // #11
+                           (cardNameLower.includes('pikachu star') && setNameLower.includes('holon phantoms')) || // #12
+                           (cardNameLower.includes('espeon star') && setNameLower.includes('pop series')) || // #13
+                           (cardNameLower.includes('umbreon vmax') && setNameLower.includes('evolving skies')) || // #14
+                           (cardNameLower.includes('mew star') && setNameLower.includes('dragon frontiers')) || // #15
+                           (cardNameLower.includes('metagross star') && setNameLower.includes('delta species')) || // #16
+                           (cardNameLower.includes('gengar') && cardNameLower.includes('mimikyu') && setNameLower.includes('team up')) || // #17
+                           (cardNameLower.includes('gyarados') && setNameLower.includes('skyridge')) || // #18
+                           (cardNameLower.includes('jolteon star') && setNameLower.includes('power keepers')) || // #19
+                           (cardNameLower.includes('dialga ex') && setNameLower.includes('phantom forces')); // #20
+            
+            // TOP 21-50 TRENDING
+            const isTop50 = (cardNameLower.includes('alakazam star')) ||
+                           (cardNameLower.includes('magikarp') && cardNameLower.includes('wailord') && setNameLower.includes('team up')) ||
+                           (cardNameLower.includes('flareon star')) ||
+                           (cardNameLower.includes('celebi star')) ||
+                           (cardNameLower.includes('gengar') && setNameLower.includes('legendary collection')) ||
+                           (cardNameLower.includes('umbreon ex') && setNameLower.includes('prismatic')) ||
+                           (cardNameLower.includes('gyarados star')) ||
+                           (cardNameLower.includes('umbreon ex') && setNameLower.includes('unseen forces'));
+            
+            if (isTop20 && !isGoldStar) {
+                trendingScore = 0.4; // Top 20 trending
+                monthlyGrowthRate += 0.015; // +1.5% for top 20
+                confidence += 8;
+            } else if (isTop50 && !isGoldStar) {
+                trendingScore = 0.3; // Top 50 trending
+                monthlyGrowthRate += 0.01; // +1% for top 50
+                confidence += 5;
+            }
+            
+            // SPECIAL CASE: Prismatic Evolutions Individual Card Corrections
+            // Note: Set is 12+ months old (past the dip) but INDIVIDUAL chase cards 
+            // had secondary hype spikes in late 2025 and are NOW correcting
+            // Set overall: +8% | But top cards: -35% to -40%
+            const isPrismaticChaseCorrection = setNameLower.includes('prismatic') && 
+                                         (cardNameLower.includes('umbreon ex') || 
+                                          cardNameLower.includes('mega charizard') ||
+                                          cardNameLower.includes('sylveon ex') ||
+                                          cardNameLower.includes('glaceon ex'));
+            
+            if (isPrismaticChaseCorrection) {
+                monthlyGrowthRate -= 0.03; // -3% correction penalty (these spiked recently, now falling)
+                confidence -= 12;
+            }
+            
+            // MODERATE GROWTH: Prismatic Evolutions non-chase cards
+            // Set overall +8% but stable, past launch dip
+            const isPrismaticStable = setNameLower.includes('prismatic') && !isPrismaticChaseCorrection;
+            if (isPrismaticStable) {
+                monthlyGrowthRate += 0.008; // +0.8% (reflecting actual +8% trend)
+                confidence += 3;
+            }
+            
+            scores.trending = trendingScore;
+            totalScore += trendingScore;
+
+            // Round to 1 decimal
+            totalScore = Math.round(totalScore * 10) / 10;
+            
+            // Set base growth rate and confidence based on totalScore
+            if (totalScore >= 9) {
+                monthlyGrowthRate = 0.08; // 8% per month - Very bullish
+                confidence = 90;
+            } else if (totalScore >= 8) {
+                monthlyGrowthRate = 0.06; // 6% per month - Strong bullish
+                confidence = 85;
+            } else if (totalScore >= 7) {
+                monthlyGrowthRate = 0.04; // 4% per month - Bullish
+                confidence = 80;
+            } else if (totalScore >= 6) {
+                monthlyGrowthRate = 0.02; // 2% per month - Moderately bullish
+                confidence = 70;
+            } else if (totalScore >= 5) {
+                monthlyGrowthRate = 0.005; // 0.5% per month - Slight appreciation
+                confidence = 65;
+            } else if (totalScore >= 4) {
+                monthlyGrowthRate = -0.01; // -1% per month - Slight depreciation
+                confidence = 65;
+            } else if (totalScore >= 3) {
+                monthlyGrowthRate = -0.025; // -2.5% per month - Moderately bearish
+                confidence = 70;
+            } else if (totalScore >= 2) {
+                monthlyGrowthRate = -0.04; // -4% per month - Bearish
+                confidence = 80;
+            } else {
+                monthlyGrowthRate = -0.06; // -6% per month - Very bearish
+                confidence = 85;
+            }
+
+            // Display results - pass all calculated values
+            displayResults(totalScore, scores, monthlyGrowthRate, confidence);
+        }
+
+        function displayResults(totalScore, scores, monthlyGrowthRate, confidence) {
+            const resultsDiv = document.getElementById('results');
+            const scoreCircle = document.getElementById('scoreCircle');
+            const scoreNumber = document.getElementById('scoreNumber');
+            const recommendation = document.getElementById('recommendation');
+
+            // Update score display
+            scoreNumber.textContent = totalScore.toFixed(1);
+
+            // Determine recommendation and styling
+            let recText = '';
+            let recClass = '';
+            
+            if (totalScore >= 9) {
+                recText = '🚀 STRONG BUY';
+                recClass = 'strong-buy';
+            } else if (totalScore >= 7) {
+                recText = '✅ BUY';
+                recClass = 'buy';
+            } else if (totalScore >= 5) {
+                recText = '⏸️ HOLD';
+                recClass = 'hold';
+            } else if (totalScore >= 3) {
+                recText = '⚠️ SELL';
+                recClass = 'sell';
+            } else {
+                recText = '🔴 STRONG SELL';
+                recClass = 'strong-sell';
+            }
+
+            scoreCircle.className = 'score-circle ' + recClass;
+            recommendation.textContent = recText;
+            recommendation.className = 'recommendation ' + recClass;
+
+            // Update breakdown
+            document.getElementById('popScore').textContent = scores.pop.toFixed(1) + '/2.5';
+            document.getElementById('premiumScore').textContent = scores.premium.toFixed(1) + '/2.5';
+            document.getElementById('socialScore').textContent = scores.social.toFixed(1) + '/2.0';
+            document.getElementById('momentumScore').textContent = scores.momentum.toFixed(1) + '/1.5';
+            document.getElementById('positionScore').textContent = scores.position.toFixed(1) + '/1.5';
+            document.getElementById('technicalScore').textContent = scores.technical.toFixed(1) + '/0.5';
+            document.getElementById('playabilityScore').textContent = (scores.playability || 0).toFixed(1) + '/0.5';
+            document.getElementById('trendingScore').textContent = (scores.trending || 0).toFixed(1) + '/0.5';
+
+            // Generate tweet
+            generateTweet(totalScore, recText, scores, monthlyGrowthRate, confidence);
+
+            // Generate price projections
+            console.log('About to call generateProjections');
+            const psa10PriceForProjections = parseFloat(document.getElementById('psa10Price').value);
+            console.log('psa10Price value for projections:', psa10PriceForProjections);
+            console.log('psa10Price type:', typeof psa10PriceForProjections);
+            console.log('monthlyGrowthRate:', monthlyGrowthRate);
+            console.log('confidence:', confidence);
+            generateProjections(totalScore, scores, psa10PriceForProjections, monthlyGrowthRate, confidence);
+
+            // Show results
+            resultsDiv.classList.add('show');
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function generateProjections(totalScore, scores, currentPrice, monthlyGrowthRate, confidence) {
+            console.log('generateProjections called');
+            console.log('totalScore:', totalScore);
+            console.log('currentPrice:', currentPrice);
+            console.log('currentPrice type:', typeof currentPrice);
+            console.log('isNaN(currentPrice):', isNaN(currentPrice));
+            console.log('monthlyGrowthRate received:', monthlyGrowthRate);
+            console.log('confidence received:', confidence);
+            
+            // Get variables needed for calculations
+            const cardNameLower = document.getElementById('cardName').value.toLowerCase();
+            const setNameLower = document.getElementById('setName').value.toLowerCase();
+            const cardType = document.getElementById('cardType').value;
+            
+            const projectionsDiv = document.getElementById('priceProjections');
+            
+            // Check if currentPrice is valid
+            if (!currentPrice || isNaN(currentPrice) || currentPrice <= 0) {
+                projectionsDiv.innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #ff6b6b;">
+                        <strong>⚠️ Unable to generate price projections</strong><br>
+                        <span style="font-size: 14px;">Please ensure you've entered a valid PSA 10 price above.</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Use the monthlyGrowthRate and confidence already calculated in calculateScore
+            // (passed as parameters - no need to recalculate)
+            console.log('Using passed monthlyGrowthRate:', monthlyGrowthRate);
+            console.log('Using passed confidence:', confidence);
+            
+            // Calculate projections
+            const projections = [
+                { timeframe: '3-Month', months: 3 },
+                { timeframe: '6-Month', months: 6 },
+                { timeframe: '1-Year', months: 12 }
+            ];
+            
+            let html = '';
+            
+            projections.forEach(proj => {
+                const targetPrice = currentPrice * Math.pow(1 + monthlyGrowthRate, proj.months);
+                const lowTarget = targetPrice * 0.95; // ±5% range
+                const highTarget = targetPrice * 1.05;
+                const priceChange = ((targetPrice - currentPrice) / currentPrice) * 100;
+                
+                let signal = 'HOLD';
+                let signalClass = 'hold';
+                
+                // Adjust thresholds based on timeframe - longer timeframes need lower thresholds
+                let buyThreshold = 10; // Default for 3-month
+                let strongBuyThreshold = 20;
+                
+                if (proj.months === 6) {
+                    buyThreshold = 8; // Lower threshold for 6-month
+                    strongBuyThreshold = 15;
+                } else if (proj.months === 12) {
+                    buyThreshold = 12; // 12%+ annual return = buy
+                    strongBuyThreshold = 20; // 20%+ annual return = strong buy
+                }
+                
+                if (priceChange >= strongBuyThreshold) {
+                    signal = 'STRONG BUY';
+                    signalClass = 'buy';
+                } else if (priceChange >= buyThreshold) {
+                    signal = 'BUY';
+                    signalClass = 'buy';
+                } else if (priceChange >= 0) {
+                    signal = 'HOLD';
+                    signalClass = 'hold';
+                } else if (priceChange <= -20) {
+                    signal = 'STRONG SELL';
+                    signalClass = 'sell';
+                } else if (priceChange <= -10) {
+                    signal = 'SELL';
+                    signalClass = 'sell';
+                } else {
+                    signal = 'HOLD';
+                    signalClass = 'hold';
+                }
+                
+                const changeClass = priceChange >= 0 ? 'up' : 'down';
+                const changeSymbol = priceChange >= 0 ? '+' : '';
+                
+                html += `
+                    <div class="projection">
+                        <div class="projection-header">
+                            <span class="projection-timeframe">${proj.timeframe} Target</span>
+                            <span class="projection-signal ${signalClass}">${signal}</span>
+                        </div>
+                        <div class="projection-details">
+                            <div class="projection-row">
+                                <span class="projection-label">Current:</span>
+                                <span class="projection-value">$${Math.round(currentPrice).toLocaleString()}</span>
+                            </div>
+                            <div class="projection-row">
+                                <span class="projection-label">Target Range:</span>
+                                <span class="projection-value ${changeClass}">$${Math.round(lowTarget).toLocaleString()}-$${Math.round(highTarget).toLocaleString()}</span>
+                            </div>
+                            <div class="projection-row">
+                                <span class="projection-label">Expected Change:</span>
+                                <span class="projection-value ${changeClass}">${changeSymbol}${priceChange.toFixed(1)}%</span>
+                            </div>
+                            <div class="projection-row">
+                                <span class="projection-label">Monthly Rate:</span>
+                                <span class="projection-value ${changeClass}">${changeSymbol}${(monthlyGrowthRate * 100).toFixed(1)}%/mo</span>
+                            </div>
+                            <div class="projection-confidence">
+                                <strong>Confidence: ${confidence}%</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            projectionsDiv.innerHTML = html;
+        }
+
+        function generateTweet(score, recommendation, scores, monthlyGrowthRate, confidence) {
+            const cardName = document.getElementById('cardName').value;
+            const setName = document.getElementById('setName').value;
+            const psa10Price = parseFloat(document.getElementById('psa10Price').value);
+            
+            // Calculate average price from optional sources
+            const prices = [
+                parseFloat(document.getElementById('priceCharting').value) || 0,
+                parseFloat(document.getElementById('goldin').value) || 0,
+                parseFloat(document.getElementById('ebay').value) || 0,
+                parseFloat(document.getElementById('tcgMarketplace').value) || 0
+            ].filter(p => p > 0);
+            
+            let currentPrice = 0;
+            
+            if (prices.length > 0) {
+                currentPrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+            } else if (psa10Price > 0) {
+                currentPrice = Math.round(psa10Price);
+            }
+
+            // Use the passed monthlyGrowthRate and confidence (already calculated in calculateScore)
+            console.log('generateTweet using monthlyGrowthRate:', monthlyGrowthRate);
+            console.log('generateTweet using confidence:', confidence);
+            
+            // Calculate targets using psa10Price
+            const threeMonthTarget = psa10Price * Math.pow(1 + monthlyGrowthRate, 3);
+            const sixMonthTarget = psa10Price * Math.pow(1 + monthlyGrowthRate, 6);
+            const oneYearTarget = psa10Price * Math.pow(1 + monthlyGrowthRate, 12);
+            
+            const threeMonthChange = ((threeMonthTarget - psa10Price) / psa10Price) * 100;
+            const sixMonthChange = ((sixMonthTarget - psa10Price) / psa10Price) * 100;
+            const oneYearChange = ((oneYearTarget - psa10Price) / psa10Price) * 100;
+            
+            // Determine signals with emojis
+            function getSignalEmoji(change, months) {
+                let threshold = 10;
+                if (months === 6) threshold = 8;
+                if (months === 12) threshold = 12;
+                
+                if (change >= threshold) return '✅ BUY';
+                if (change <= -10) return '❌ SELL';
+                return '⏸️ HOLD';
+            }
+            
+            const signal3m = getSignalEmoji(threeMonthChange, 3);
+            const signal6m = getSignalEmoji(sixMonthChange, 6);
+            const signal1y = getSignalEmoji(oneYearChange, 12);
+            
+            // Generate advice based on overall score
+            let advice = '';
+            
+            // Update 7: Volatility Warning for Speculation Plays
+            const isHighVolatility = scores.social >= 1.5 && scores.momentum >= 1.2;
+            
+            if (score >= 8) {
+                advice = 'Strong long-term hold with excellent upside potential across all timeframes.';
+            } else if (score >= 7) {
+                advice = 'Solid buy for medium to long-term holders. Good steady appreciation expected.';
+            } else if (score >= 6) {
+                advice = 'Best for 6-12 month holds. Not ideal for quick flips.';
+            } else if (score >= 5) {
+                advice = 'Long-term play only. Skip if looking for short-term gains.';
+            } else if (score >= 4) {
+                advice = 'Limited upside. Only buy if you believe fundamentals will improve.';
+            } else if (score >= 3) {
+                advice = 'Weak outlook. Consider selling if you own this card.';
+            } else {
+                advice = 'High risk of depreciation. Sell now or avoid buying.';
+            }
+            
+            // Add volatility warning if applicable
+            if (isHighVolatility) {
+                advice += ' ⚠️ Caution: Speculation-driven hype. May see price correction.';
+            }
+            
+            // Update 16: Auction Volatility Warning for High-End Cards
+            // Going Twice: "Each card is one auction away from sky-rocketing or plummeting in price"
+            const isHighEnd = currentPrice > 500;
+            if (isHighEnd) {
+                advice += ' 🎯 Note: High-end cards can swing ±20% on single auction results.';
+            }
+
+            // Build tweet
+            let tweet = `🔮 CARDMARKETPRO PREDICTION\n\n`;
+            tweet += `${cardName}\n`;
+            tweet += `Set: ${setName}\n`;
+            tweet += `Grade: PSA 10\n\n`;
+            
+            tweet += `📊 Current: $${Math.round(currentPrice).toLocaleString()}\n\n`;
+            
+            tweet += `🎯 3-Month: $${Math.round(threeMonthTarget * 0.95).toLocaleString()}-$${Math.round(threeMonthTarget * 1.05).toLocaleString()} (${threeMonthChange >= 0 ? '+' : ''}${threeMonthChange.toFixed(1)}%)\n`;
+            tweet += `${signal3m}\n\n`;
+            
+            tweet += `🎯 6-Month: $${Math.round(sixMonthTarget * 0.95).toLocaleString()}-$${Math.round(sixMonthTarget * 1.05).toLocaleString()} (${sixMonthChange >= 0 ? '+' : ''}${sixMonthChange.toFixed(1)}%)\n`;
+            tweet += `${signal6m}\n\n`;
+            
+            tweet += `🎯 1-Year: $${Math.round(oneYearTarget * 0.95).toLocaleString()}-$${Math.round(oneYearTarget * 1.05).toLocaleString()} (${oneYearChange >= 0 ? '+' : ''}${oneYearChange.toFixed(1)}%)\n`;
+            tweet += `${signal1y}\n\n`;
+            
+            tweet += `⚡ Confidence: ${confidence}%\n`;
+            tweet += `📈 Score: ${score.toFixed(1)}/10\n\n`;
+            
+            tweet += `💡 ${advice}\n\n`;
+            
+            tweet += `#PokemonCards #CardMarketPro #PokemonTCG`;
+
+            document.getElementById('tweetPreview').textContent = tweet;
+        }
+    </script>
+</body>
+</html>
